@@ -112,11 +112,21 @@ export default function CollectionDetailPage() {
 
   useEffect(() => { loadItems(); }, [loadItems]);
 
-  // 提取所有游戏版本用于筛选（最新在前）
+  // 提取所有游戏版本用于筛选（最新在前）— 仅保留正式版（如 1.20.1, 1.21 等纯数字版本）
   const allVersions = [...new Set(items.flatMap(i => {
     try { return JSON.parse(i.gameVersions) as string[]; }
     catch { return []; }
-  }))].sort().reverse();
+  }))]
+    .filter(v => /^\d+(\.\d+)+$/.test(v))
+    .sort((a, b) => {
+      const pa = a.split('.').map(Number);
+      const pb = b.split('.').map(Number);
+      for (let i = 0; i < Math.min(pa.length, pb.length); i++) {
+        if (pa[i] !== pb[i]) return pa[i] - pb[i];
+      }
+      return pa.length - pb.length;
+    })
+    .reverse();
 
   // 获取某个 item 的已筛选文件版本（按游戏版本 + 加载器 + release 类型，最新在前）
   const getFilteredFiles = (itemId: string): ModFile[] => {
@@ -428,28 +438,17 @@ export default function CollectionDetailPage() {
         </div>
       )}
 
-      {/* CompatibilityCheck — 仅当所有已选资源都选定了具体版本后才检测 */}
+      {/* CompatibilityCheck — 实时检测 */}
       {selected.size >= 2 && (
         <div className="mt-6 animate-fade-in">
           {(() => {
             const selectedItems = items.filter(i => selected.has(i.id));
-            const allHaveVersion = selectedItems.every(i => versionSelections[i.id]);
-            if (!allHaveVersion) {
-              return (
-                <div className="p-4 bg-mc-card rounded-mc border border-white/5 text-center">
-                  <p className="text-xs text-mc-muted">
-                    请为每个资源选择具体版本后查看兼容性检测
-                  </p>
-                </div>
-              );
-            }
-            const selectedVersions = selectedItems
-              .map(i => {
-                const file = itemFiles[i.id]?.find(f => f.id === versionSelections[i.id]);
-                return file ? { item: i, file } : null;
-              })
-              .filter(Boolean) as { item: CollectionItem; file: ModFile }[];
-            return <CompatibilityCheck selectedVersions={selectedVersions} />;
+            const compatItems = selectedItems.map(i => {
+              const fileId = versionSelections[i.id];
+              const file = fileId ? itemFiles[i.id]?.find(f => f.id === fileId) : undefined;
+              return { item: i, file };
+            });
+            return <CompatibilityCheck items={compatItems} />;
           })()}
         </div>
       )}

@@ -37,11 +37,21 @@ export default function VersionSelector({ files, source, modId }: VersionSelecto
   const [filterLoader, setFilterLoader] = useState<string>('all');
   const [filterReleaseType, setFilterReleaseType] = useState<string>('all');
 
-  // 收集所有去重的游戏版本
+  // 收集所有去重的游戏版本（仅保留正式版，如 1.20.1、1.21 等纯数字版本）
   const allGameVersions = useMemo(() => {
     const set = new Set<string>();
     files.forEach((f) => f.gameVersions.forEach((gv) => set.add(gv)));
-    return Array.from(set).sort().reverse();
+    return Array.from(set)
+      .filter(v => /^\d+(\.\d+)+$/.test(v))
+      .sort((a, b) => {
+        const pa = a.split('.').map(Number);
+        const pb = b.split('.').map(Number);
+        for (let i = 0; i < Math.min(pa.length, pb.length); i++) {
+          if (pa[i] !== pb[i]) return pa[i] - pb[i];
+        }
+        return pa.length - pb.length;
+      })
+      .reverse();
   }, [files]);
 
   // 收集所有去重的加载器

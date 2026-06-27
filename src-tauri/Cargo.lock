@@ -2291,7 +2291,7 @@ dependencies = [
 
 [[package]]
 name = "mc-mod-hub-light"
-version = "0.1.2"
+version = "0.1.4"
 dependencies = [
  "chrono",
  "dirs-next",
