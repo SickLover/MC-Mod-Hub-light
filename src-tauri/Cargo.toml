@@ -1,6 +1,6 @@
 [package]
 name = "mc-mod-hub-light"
-version = "0.1.4"
+version = "0.1.6"
 edition = "2021"
 description = "MC Mod Hub - Minecraft Mod Manager"
 

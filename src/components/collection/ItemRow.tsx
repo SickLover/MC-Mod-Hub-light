@@ -9,11 +9,14 @@ interface ItemRowProps {
   fileVersions: ModFile[];
   selectedVersion: string;
   onVersionChange: (fileId: string) => void;
+  /// 当前筛选条件下无匹配版本时显示的原因
+  filterUnmatchedReason?: string;
 }
 
 export default function ItemRow({
   item, checked, onToggle, onRemove,
   fileVersions = [], selectedVersion, onVersionChange,
+  filterUnmatchedReason,
 }: ItemRowProps) {
   const sourceLabel = item.source === 'curseforge' ? 'CF' : 'MR';
   const sourceColor = item.source === 'curseforge'
@@ -62,25 +65,33 @@ export default function ItemRow({
         )}
       </div>
 
-      {/* 版本选择 */}
+      {/* 版本选择 / 无匹配版本原因 */}
       <div className="flex-shrink-0 w-[160px]">
-        <select
-          value={selectedVersion}
-          onChange={(e) => onVersionChange(e.target.value)}
-          className="w-full px-2 py-1 bg-mc-bg border border-white/10 rounded text-xs text-mc-text
-                     focus:outline-none focus:border-mc-green/40 transition-colors cursor-pointer"
-        >
-          <option value="">选择版本</option>
-          {fileVersions.map(f => (
-            <option key={f.id} value={f.id}>
-              {f.displayName || f.fileName}
-            </option>
-          ))}
-        </select>
-        {fileVersions.length > 0 && (
-          <div className="text-[10px] text-mc-muted/60 text-right mt-0.5">
-            {fileVersions.length} 个版本
+        {filterUnmatchedReason ? (
+          <div className="text-xs text-yellow-400/80 text-center px-2 py-1 bg-yellow-400/5 border border-yellow-400/20 rounded">
+            {filterUnmatchedReason}
           </div>
+        ) : (
+          <>
+            <select
+              value={selectedVersion}
+              onChange={(e) => onVersionChange(e.target.value)}
+              className="w-full px-2 py-1 bg-mc-bg border border-white/10 rounded text-xs text-mc-text
+                         focus:outline-none focus:border-mc-green/40 transition-colors cursor-pointer"
+            >
+              <option value="">选择版本</option>
+              {fileVersions.map(f => (
+                <option key={f.id} value={f.id}>
+                  {f.displayName || f.fileName}
+                </option>
+              ))}
+            </select>
+            {fileVersions.length > 0 && (
+              <div className="text-[10px] text-mc-muted/60 text-right mt-0.5">
+                {fileVersions.length} 个版本
+              </div>
+            )}
+          </>
         )}
       </div>
 

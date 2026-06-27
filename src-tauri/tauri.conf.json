@@ -1,6 +1,6 @@
 {
   "productName": "MC Mod Hub",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "identifier": "com.mcmodhub.light",
   "build": {
     "devUrl": "http://localhost:1420",

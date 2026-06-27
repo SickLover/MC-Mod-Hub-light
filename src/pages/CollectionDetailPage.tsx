@@ -141,21 +141,9 @@ export default function CollectionDetailPage() {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   };
 
-  // 筛选资源列表
+  // 筛选资源列表（仅来源筛选会隐藏 mod，其他筛选仅影响版本下拉选项）
   const filtered = items.filter(item => {
     if (filterSource !== 'all' && item.source !== filterSource) return false;
-    if (filterVersion !== 'all') {
-      try {
-        const versions: string[] = JSON.parse(item.gameVersions);
-        if (!versions.includes(filterVersion)) return false;
-      } catch { return false; }
-    }
-    if (filterLoader !== 'all') {
-      try {
-        const cats: string[] = JSON.parse(item.categories);
-        if (!cats.some(c => c.toLowerCase() === filterLoader)) return false;
-      } catch { return false; }
-    }
     return true;
   });
 
@@ -380,13 +368,6 @@ export default function CollectionDetailPage() {
         {loadingVersions && (
           <span className="text-xs text-mc-muted self-center">加载版本中...</span>
         )}
-
-        {/* 筛选结果计数 */}
-        {filtered.length !== items.length && (
-          <span className="text-xs text-mc-muted self-center">
-            筛选出 {filtered.length} 个
-          </span>
-        )}
       </div>
 
       {/* 全选 bar */}
@@ -409,13 +390,51 @@ export default function CollectionDetailPage() {
       {/* ItemRow 列表 */}
       {filtered.length === 0 ? (
         <div className="py-12 text-center text-mc-muted text-sm">
-          没有符合筛选条件的资源
+          没有符合来源筛选条件的资源
         </div>
       ) : (
         <div className="space-y-0.5">
           {filtered.map(item => {
             const filteredFiles = getFilteredFiles(item.id);
             const currentVersion = versionSelections[item.id] ?? '';
+
+            // 生成无匹配版本的原因提示
+            const filterReason = (() => {
+              if (filteredFiles.length > 0) return undefined;
+              const allFiles = itemFiles[item.id] || [];
+              if (allFiles.length === 0) return '暂无版本信息';
+
+              const reasons: string[] = [];
+
+              if (filterVersion !== 'all') {
+                const has = allFiles.some(f => f.gameVersions.includes(filterVersion));
+                if (!has) reasons.push(`无 ${filterVersion} 版本可用`);
+              }
+              if (filterLoader !== 'all') {
+                const loaderLabel = LOADERS.find(l => l.value === filterLoader)?.label || filterLoader;
+                const has = allFiles.some(f => f.modLoaders.some(l => l.toLowerCase() === filterLoader));
+                if (!has) reasons.push(`无 ${loaderLabel} 版本可用`);
+              }
+              if (filterReleaseType !== 'all') {
+                const typeLabel = RELEASE_TYPES.find(t => t.value === filterReleaseType)?.label || filterReleaseType;
+                const has = allFiles.some(f => f.releaseType === filterReleaseType);
+                if (!has) reasons.push(`无 ${typeLabel} 版本可用`);
+              }
+
+              if (reasons.length > 0) return reasons.join('，');
+
+              // 各条件单独满足，但组合筛选后无结果
+              const activeFilters: string[] = [];
+              if (filterVersion !== 'all') activeFilters.push(filterVersion);
+              if (filterLoader !== 'all') {
+                activeFilters.push(LOADERS.find(l => l.value === filterLoader)?.label || filterLoader);
+              }
+              if (filterReleaseType !== 'all') {
+                activeFilters.push(RELEASE_TYPES.find(t => t.value === filterReleaseType)?.label || filterReleaseType);
+              }
+              return `暂无同时满足 ${activeFilters.join(' + ')} 的版本`;
+            })();
+
             return (
               <ItemRow
                 key={item.id}
@@ -432,6 +451,7 @@ export default function CollectionDetailPage() {
                 fileVersions={filteredFiles}
                 selectedVersion={currentVersion}
                 onVersionChange={(fileId) => handleVersionChange(item.id, fileId)}
+                filterUnmatchedReason={filterReason}
               />
             );
           })}
