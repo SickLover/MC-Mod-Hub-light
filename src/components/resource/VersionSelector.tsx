@@ -24,6 +24,7 @@ const RELEASE_TYPE_STYLE: Record<string, { label: string; color: string }> = {
 
 export default function VersionSelector({ files, source, modId }: VersionSelectorProps) {
   const [filterGameVersion, setFilterGameVersion] = useState<string | null>(null);
+  const [filterLoader, setFilterLoader] = useState<string | null>(null);
 
   // 收集所有去重的游戏版本
   const allGameVersions = useMemo(() => {
@@ -32,10 +33,27 @@ export default function VersionSelector({ files, source, modId }: VersionSelecto
     return Array.from(set).sort().reverse();
   }, [files]);
 
-  // 筛选后的文件列表
-  const filteredFiles = filterGameVersion
-    ? files.filter((f) => f.gameVersions.includes(filterGameVersion))
-    : files;
+  // 收集所有去重的加载器
+  const allLoaders = useMemo(() => {
+    const set = new Set<string>();
+    files.forEach((f) => f.modLoaders.forEach((l) => set.add(l)));
+    return Array.from(set);
+  }, [files]);
+
+  // 筛选后的文件列表（版本 + 加载器叠加筛选）
+  const filteredFiles = useMemo(() => {
+    let result = files;
+    if (filterGameVersion) {
+      result = result.filter((f) => f.gameVersions.includes(filterGameVersion));
+    }
+    if (filterLoader) {
+      const lower = filterLoader.toLowerCase();
+      result = result.filter((f) =>
+        f.modLoaders.some((l) => l.toLowerCase() === lower)
+      );
+    }
+    return result;
+  }, [files, filterGameVersion, filterLoader]);
 
   return (
     <div>
@@ -70,6 +88,35 @@ export default function VersionSelector({ files, source, modId }: VersionSelecto
           </span>
         )}
       </div>
+
+      {/* 加载器筛选 chips */}
+      {allLoaders.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          <button
+            onClick={() => setFilterLoader(null)}
+            className={`px-3 py-1 text-xs rounded-full transition-all duration-200 ${
+              !filterLoader
+                ? 'bg-mc-green/15 text-mc-green-light border border-mc-green/20'
+                : 'bg-mc-card text-mc-muted border border-white/5 hover:text-mc-text'
+            }`}
+          >
+            全部加载器
+          </button>
+          {allLoaders.map((loader) => (
+            <button
+              key={loader}
+              onClick={() => setFilterLoader(loader === filterLoader ? null : loader)}
+              className={`px-3 py-1 text-xs rounded-full transition-all duration-200 capitalize ${
+                filterLoader === loader
+                  ? 'bg-mc-green/15 text-mc-green-light border border-mc-green/20'
+                  : 'bg-mc-card text-mc-muted border border-white/5 hover:text-mc-text'
+              }`}
+            >
+              {loader}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 文件列表 */}
       {filteredFiles.length === 0 ? (

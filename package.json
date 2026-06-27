@@ -1,7 +1,7 @@
 {
   "name": "mc-mod-hub-light",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,16 +9,21 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "version": "node scripts/bump-version.cjs",
+    "version:patch": "node scripts/bump-version.cjs patch",
+    "version:minor": "node scripts/bump-version.cjs minor",
+    "version:major": "node scripts/bump-version.cjs major",
+    "build:release": "tauri build"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0",
-    "@tauri-apps/api": "^2.0.0"
+    "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.0.0",
+    "@tauri-apps/cli": "^2.11.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.0",

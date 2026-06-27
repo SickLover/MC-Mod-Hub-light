@@ -56,9 +56,9 @@ mc-mod-hub-light/
 
 | 项目 | 状态 |
 |------|------|
-| 当前 Step | **Step 10（最终步）**（prompt.md 内容 = GitHub Actions CI/CD） |
-| 已完成 | Step 1–9（全部页面 + 打包）+ 补丁（6 个修复）+ Code Review（0 Critical / 2 Major / 5 Minor） |
-| 下一轮 | 你说"我完成了 Step 10" → 项目完结 🎉 |
+| 当前 Step | **补丁 3**（prompt.md 内容 = 兼容性检测优化 + 加载器筛选修复） |
+| 已完成 | Step 1–10 + 补丁 1（6 修复）+ 补丁 2（加载器兼容检查）+ Code Review |
+| 下一轮 | 你说"我完成了补丁 3" → 项目完结 🎉 |
 
 ## 项目背景
 

@@ -70,7 +70,7 @@ export default function ItemRow({
           className="w-full px-2 py-1 bg-mc-bg border border-white/10 rounded text-xs text-mc-text
                      focus:outline-none focus:border-mc-green/40 transition-colors cursor-pointer"
         >
-          <option value="">自动（最新版）</option>
+          <option value="">选择版本</option>
           {fileVersions.map(f => (
             <option key={f.id} value={f.id}>
               {f.displayName || f.fileName}

@@ -1,6 +1,6 @@
 {
   "productName": "MC Mod Hub",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "identifier": "com.mcmodhub.light",
   "build": {
     "devUrl": "http://localhost:1420",
@@ -40,7 +40,10 @@
       },
       "nsis": {
         "installMode": "currentUser",
-        "languages": ["SimpChinese", "English"]
+        "languages": [
+          "SimpChinese",
+          "English"
+        ]
       }
     }
   }

@@ -82,12 +82,13 @@ export default function CollectionDetailPage() {
     catch { return []; }
   }))].sort().reverse();
 
-  // 获取某个 item 的已筛选文件版本（按游戏版本 + release 类型，最新在前）
+  // 获取某个 item 的已筛选文件版本（按游戏版本 + 加载器 + release 类型，最新在前）
   const getFilteredFiles = (itemId: string): ModFile[] => {
     const files = itemFiles[itemId] || [];
     return files
       .filter(f => {
         if (filterVersion !== 'all' && !f.gameVersions.includes(filterVersion)) return false;
+        if (filterLoader !== 'all' && !f.modLoaders.some(l => l.toLowerCase() === filterLoader)) return false;
         if (filterReleaseType !== 'all' && f.releaseType !== filterReleaseType) return false;
         return true;
       })
@@ -296,12 +297,29 @@ export default function CollectionDetailPage() {
         </div>
       )}
 
-      {/* CompatibilityCheck */}
+      {/* CompatibilityCheck — 仅当所有已选资源都选定了具体版本后才检测 */}
       {selected.size >= 2 && (
         <div className="mt-6 animate-fade-in">
-          <CompatibilityCheck
-            selectedItems={items.filter(i => selected.has(i.id))}
-          />
+          {(() => {
+            const selectedItems = items.filter(i => selected.has(i.id));
+            const allHaveVersion = selectedItems.every(i => versionSelections[i.id]);
+            if (!allHaveVersion) {
+              return (
+                <div className="p-4 bg-mc-card rounded-mc border border-white/5 text-center">
+                  <p className="text-xs text-mc-muted">
+                    请为每个资源选择具体版本后查看兼容性检测
+                  </p>
+                </div>
+              );
+            }
+            const selectedVersions = selectedItems
+              .map(i => {
+                const file = itemFiles[i.id]?.find(f => f.id === versionSelections[i.id]);
+                return file ? { item: i, file } : null;
+              })
+              .filter(Boolean) as { item: CollectionItem; file: ModFile }[];
+            return <CompatibilityCheck selectedVersions={selectedVersions} />;
+          })()}
         </div>
       )}
 
